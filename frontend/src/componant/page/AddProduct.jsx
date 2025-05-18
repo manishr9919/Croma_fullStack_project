@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import axios from "axios";
 
@@ -8,46 +9,55 @@ const AddProduct = () => {
     description: "",
     category: "",
     stock: "",
-    imageUrl: "",
   });
+
+  const [imageFile, setImageFile] = useState(null); // Separate state for image
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setProductData({ ...productData, [name]: value });
   };
 
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    setImageFile(file);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
-      // Define the API endpoint
+      const formData = new FormData();
+      // Append text fields
+      for (let key in productData) {
+        formData.append(key, productData[key]);
+      }
+      // Append image file
+      if (imageFile) {
+        formData.append("image", imageFile);
+      }
 
-      // https://fullstackapp-banckend-for-cw-1.onrender.com/product/addProduct
-      const apiEndpoint = " http://localhost:3000/product/addProduct"; // Replace with your actual endpoint
+      const apiEndpoint = "http://localhost:3000/product/addProduct";
 
-      // Send a POST request with the product data in JSON format
-      const response = await axios.post(apiEndpoint, productData, {
+      const response = await axios.post(apiEndpoint, formData, {
         headers: {
-          "Content-Type": "application/json", // Specify JSON format
+          "Content-Type": "multipart/form-data",
         },
       });
-      console.log(productData);
 
-      // Handle success
       console.log("Product successfully added:", response.data);
       alert("Product added successfully!");
 
-      // Optionally, clear form or reset state
+      // Reset states
       setProductData({
         name: "",
         price: "",
         description: "",
         category: "",
         stock: "",
-        imageUrl: "",
       });
+      setImageFile("");
     } catch (error) {
-      // Handle errors
       console.error(
         "Error adding product:",
         error.response?.data || error.message
@@ -77,8 +87,8 @@ const AddProduct = () => {
             name="name"
             value={productData.name}
             onChange={handleChange}
-            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             required
+            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
 
@@ -93,8 +103,8 @@ const AddProduct = () => {
             name="price"
             value={productData.price}
             onChange={handleChange}
-            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             required
+            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
 
@@ -125,8 +135,8 @@ const AddProduct = () => {
             name="category"
             value={productData.category}
             onChange={handleChange}
-            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             required
+            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="" disabled>
               Select a category
@@ -169,10 +179,7 @@ const AddProduct = () => {
             id="imageFile"
             name="imageFile"
             accept="image/*"
-            onChange={(e) => {
-              const file = e.target.files[0];
-              setProductData({ ...productData, imageFile: file });
-            }}
+            onChange={handleImageChange}
             className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
